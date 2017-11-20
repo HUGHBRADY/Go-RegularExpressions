@@ -4,12 +4,15 @@
 
 package main
 
-import "math/rand"
-import "time"
-import "fmt"
-import "regexp"
+import (
+	"math/rand"
+	"time"
+	"fmt"
+	"regexp"
+	"strings"
+)
 
-func ElizaResponse(input string) string {
+func elizaResponse(input string) string {
 
 	// Array of strings 
 	responses := []string{
@@ -18,25 +21,56 @@ func ElizaResponse(input string) string {
 		"How does that make you feel?",
 		"Why do you say that?",
 	}
-
-	// Compile a regular expression into a RegExp object used for matching text
-
+	
 	// Checks if "father" is a word in the string
-	// if input contains "father", return
+	// if input contains "father"; return response
 	// (?i) flags the condition as case insensitive
-	if dad, _ := regexp.MatchString(`(?i)\\bfather\\b`, input); dad {
+	if dad, _ := regexp.MatchString(`(?i)\bfather\b`, input); dad {
 		return "Why don’t you tell me more about your father?"
 	}
 
-	// Checks if input begins with “I am" and capture part of the input
-	iam := regexp.MustCompile(`I am ([^.!?]*)[.!?]?`)
+	// Compile a regular expression into a RegExp object used for matching text
+	// Checks if input begins with variants “I am" and capture part of the input
+	iam := regexp.MustCompile(`(?i)i(?:'| a)?m([^.!?]*)[.!?]?`)
 	if iam.MatchString(input) {
-		return (iam.ReplaceAllString(input, "How do you know you are $1?"))		
+		return (iam.ReplaceAllString(input, "How do you know you are$1?"))		
 	}
 
 	// Will return a random string from responses array otherwise
 	return responses[rand.Intn(len(responses))]
+}
+
+func elizaReflection(input string) string {
+	// List the pronouns to switch
+	pronouns := [][]string{
+		{`am`, `are`},
+		{`I`, `you`},
+		{`me`, `you`},
+		{`your`, `my`},
+		{`you`, `I`},
+		{`my`, `your`},
+	}
+
+	// Split input into values
+	boundaries := regexp.MustCompile(`\b`)
+
+	values := boundaries.Split(input, -1)
+
+	//Loop through the range of values and reflect the pronoun if it finds a match
+	for i, token := range values {
+		for _, reflection := range pronouns {
+			if matched, _ := regexp.MatchString(reflection[0], token); matched {
+				
+				values[i] = reflection[1]
+				break
+			}
+		}
+	}
 	
+	//Join the string of values back together
+	answer := strings.Join(values, ``)
+
+	return ("Output: How do you know that " + answer)
 }
 
 func main() {
@@ -46,30 +80,32 @@ func main() {
 	// Print the input to console
 	// Then, print Eliza's response to the string you pass to her
 	fmt.Println("Input: " + " People say I look like both my mother and father.")
-	fmt.Println("Output: " + ElizaResponse("People say I look like both my mother and father.")) 
+	fmt.Println("Output: " + elizaResponse("People say I look like both my mother and father.")) 
 
 	fmt.Println("\nInput: " + " Father was a teacher.")
-	fmt.Println("Output: " + ElizaResponse("Father was a teacher."))
+	fmt.Println("Output: " + elizaResponse("Father was a teacher."))
 
 	fmt.Println("\nInput: " + " I was my father’s favourite.")
-	fmt.Println("Output: " + ElizaResponse("I was my father’s favourite."))
+	fmt.Println("Output: " + elizaResponse("I was my father’s favourite."))
 
-	fmt.Println("\nInput: " + " I am looking forward to the weekend.")
-	fmt.Println("Output: " + ElizaResponse("I'm looking forward to the weekend."))
+	fmt.Println("\nInput: " + " I'm looking forward to the weekend.")
+	fmt.Println("Output: " + elizaResponse("I'm looking forward to the weekend."))
 
 	fmt.Println("\nInput: " + " My grandfather was French!")
-	fmt.Println("Output: " + ElizaResponse("My grandfather was French!"))
+	fmt.Println("Output: " + elizaResponse("My grandfather was French!"))
 
-	fmt.Println("\nInput: " + "I am happy.")
-	fmt.Println("Output: " + ElizaResponse("I am happy."))
+	fmt.Println("\nInput: " + "I AM happy.")
+	fmt.Println("Output: " + elizaResponse("I AM happy."))
 	
 	fmt.Println("\nInput: " + "I am not happy with your responses.")
-	fmt.Println("Output: " + ElizaResponse("I am not happy with your responses."))
+	fmt.Println("Output: " + elizaResponse("I am not happy with your responses."))
 
-	fmt.Println("\nInput: " + "I am not sure that you understand the effect that your questions are having on me.")
-	fmt.Println("Output: " + ElizaResponse("I am not sure that you understand the effect that your questions are having on me."))
+	fmt.Println("\nInput: " + "im not sure that you understand the effect that your questions are having on me.")
+	fmt.Println("Output: " + elizaResponse("im not sure that you understand the effect that your questions are having on me."))
 
-	fmt.Println("\nInput: " + "I am supposed to just take what you’re saying at face value?")	
-	fmt.Println("Output: " + ElizaResponse("I am supposed to just take what you’re saying at face value?"))
+	fmt.Println("\nInput: " + "i am supposed to just take what you’re saying at face value?")	
+	fmt.Println("Output: " + elizaResponse("i am supposed to just take what you’re saying at face value?"))
 		
+	fmt.Println("\nInput: " + "I am not sure that you understand the effect your questions are having on me.")	
+	fmt.Println("Output: " + elizaResponse("I am not sure that you understand the effect your questions are having on me."))
 }
